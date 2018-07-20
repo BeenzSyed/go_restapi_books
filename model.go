@@ -2,22 +2,15 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 )
 
-//Book Struct (Model)
+//Book Struct
 type Book struct {
-	ID     int     `json:"id"`
-	Isbn   string  `json:"isbn"`
-	Title  string  `json:"title"`
-	Author *Author `json:"author"`
-}
-
-//Author Struct
-type Author struct {
-	Firstname string `json:"firstname"`
-	Lastname  string `json:"lastname"`
+	ID     int    `json:"id"`
+	Isbn   string `json:"isbn"`
+	Title  string `json:"title"`
+	Author string `json:"author"`
 }
 
 func (b *Book) getBook(db *sql.DB) error {
@@ -34,15 +27,12 @@ func (b *Book) updateBook(db *sql.DB) error {
 
 func (b *Book) deleteBook(db *sql.DB) error {
 	_, err := db.Exec("DELETE FROM books WHERE id=$1", b.ID)
-
 	return err
 }
 
 func (b *Book) createBook(db *sql.DB) error {
-	fmt.Printf("%s %s %s", b.Isbn, b.Title, *b.Author)
 	_, err := db.Exec("INSERT INTO books (isbn, title, author) VALUES ($1, $2, $3);", b.Isbn, b.Title, b.Author)
 	return err
-	//return errors.New("Not implemented")
 }
 
 func getBooks(db *sql.DB, start, count int) ([]Book, error) {
@@ -58,7 +48,6 @@ func getBooks(db *sql.DB, start, count int) ([]Book, error) {
 		if err := rows.Scan(&b.ID, &b.Isbn, &b.Title, &b.Author); err != nil {
 			log.Fatal(err)
 		}
-		//fmt.Printf("%d %s %s %s", id, isbn, title, author)
 		books = append(books, b)
 	}
 	return books, err
