@@ -102,12 +102,18 @@ func (a *App) createBook(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	if err := b.createBook(a.DB); err != nil {
+	book, err := b.createBook(a.DB)
+	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	respondWithJSON(w, http.StatusCreated, b)
+	// if err := b.createBook(a.DB); err != nil {
+	// 	respondWithError(w, http.StatusInternalServerError, err.Error())
+	// 	return
+	// }
+
+	respondWithJSON(w, http.StatusCreated, book)
 }
 
 func (a *App) updateBook(w http.ResponseWriter, r *http.Request) {
