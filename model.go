@@ -30,9 +30,19 @@ func (b *Book) deleteBook(db *sql.DB) error {
 	return err
 }
 
-func (b *Book) createBook(db *sql.DB) error {
-	_, err := db.Exec("INSERT INTO books (isbn, title, author) VALUES ($1, $2, $3);", b.Isbn, b.Title, b.Author)
-	return err
+func (b *Book) createBook(db *sql.DB) (Book, error) {
+	// _, err := db.Exec("INSERT INTO books (isbn, title, author) VALUES ($1, $2, $3);", b.Isbn, b.Title, b.Author)
+	// return err
+
+	book := Book{}
+	res, err := db.Exec("INSERT INTO books (isbn, title, author) VALUES ($1, $2, $3);", b.Isbn, b.Title, b.Author)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	println(res)
+
+	return book, err
 }
 
 func getBooks(db *sql.DB, start, count int) ([]Book, error) {
