@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -80,5 +82,58 @@ func TestEmptyTable(t *testing.T) {
 
 	if body := response.Body.String(); body != "[]" {
 		t.Errorf("Expected an empty array. Got %s", body)
+	}
+}
+
+func TestCreateBook(t *testing.T) {
+	clearTable()
+
+	payload := []byte(`{"isbn": "12345","title": "test book","author": "Sabeen Syed"}`)
+
+	req, _ := http.NewRequest("POST", "/book", bytes.NewBuffer(payload))
+	response := executeRequest(req)
+
+	checkResponseCode(t, http.StatusCreated, response.Code)
+
+	var m map[string]interface{}
+	json.Unmarshal(response.Body.Bytes(), &m)
+
+	if m["title"] != "test book" {
+		t.Errorf("Expected book title to be 'test book'. Got '%v'", m["title"])
+	}
+
+	if m["isbn"] != "12345" {
+		t.Errorf("Expected book isbn to be '12345'. Got '%v'", m["isbn"])
+	}
+
+	if m["author"] != "Sabeen Syed" {
+		t.Errorf("Expected book author to be 'Sabeen Syed'. Got '%v'", m["author"])
+	}
+
+	// the id is compared to 1.0 because JSON unmarshaling converts numbers to
+	// floats, when the target is a map[string]interface{}
+	if m["id"] != 0.0 {
+		t.Errorf("Expected book ID to be '0'. Got '%v'", m["id"])
+	}
+}
+
+func TestGetBook(t *testing.T) {
+	clearTable()
+	addBooks(1)
+
+	req, _ := http.NewRequest("GET", "/book/35", nil)
+	response := executeRequest(req)
+
+	checkResponseCode(t, http.StatusOK, response.Code)
+	fmt.Println(response.Body)
+}
+
+func addBooks(count int) {
+	if count < 1 {
+		count = 1
+	}
+
+	for i := 0; i < count; i++ {
+		a.DB.Exec("INSERT INTO books (isbn, title, author) VALUES (12345, 'Book One', 'Sabeen');")
 	}
 }
